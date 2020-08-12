@@ -71,19 +71,23 @@ exports.generatePdf = async () => {
 
     fetch('https://8svw2fhs59.execute-api.eu-west-2.amazonaws.com/dev/applicants/' + applicantID)
       .then(res => res.json())
-      .then(data => dataobj = data); 
+      //.then(data => dataobj = data); 
+      .then(dataObj => {
+        generateHeader(doc)
+        generateBody(doc, dataObj)
+    
+        doc.end()
+    
+        const buffers = []
+        doc.on("data", buffers.push.bind(buffers))
+        doc.on("end", () => {
+          const pdfData = Buffer.concat(buffers)
+          resolve(pdfData)
+        })
 
-    generateHeader(doc)
-    generateBody(doc, dataobj)
+      })
 
-    doc.end()
-
-    const buffers = []
-    doc.on("data", buffers.push.bind(buffers))
-    doc.on("end", () => {
-      const pdfData = Buffer.concat(buffers)
-      resolve(pdfData)
-    })
+    
   })
 
   return {
