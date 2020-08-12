@@ -70,7 +70,7 @@ exports.generatePdf = async () => {
     const doc = new PDFDocument()
 
     fetch('https://8svw2fhs59.execute-api.eu-west-2.amazonaws.com/dev/applicants/' + applicantID)
-      .then(res => res.json())
+      //.then(res => res.json())
       //.then(data => dataobj = data); 
       .then(dataObj => {
         generateHeader(doc)
