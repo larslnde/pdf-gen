@@ -1,0 +1,31 @@
+
+service: pdf1
+
+plugins:
+  - serverless-offline
+  - serverless-apigw-binary
+  - serverless-apigwy-binary
+
+custom:
+  serverless-offline:
+    httpPort: 4000
+  apigwBinary:
+    types:
+      - "application/pdf"
+
+provider:
+  name: aws
+  region: eu-west-2
+  runtime: nodejs12.x
+  apiGateway:
+    binaryMediaTypes:
+      - "*/*"
+
+functions: 
+  generatePdf:
+    handler: handler.generatePdf
+    events:
+      - http:
+          path: /pdf
+          method: get
+          contentHandling: CONVERT_TO_BINARY
