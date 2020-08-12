@@ -1,11 +1,14 @@
 'use strict';
 const fs = require("fs");
 const PDFDocument = require("pdfkit")
+const axios = require('axios');
+const { getHeapCodeStatistics } = require("v8");
 
+var applicantID = '50726520-dbd6-11ea-95c1-fd48d42f0d8d'
 
-const data = {
-  company_name: "openner",
-  company_website: "openner.vc",
+var data = {
+  company_name: "test",
+  company_website: "test",
   first_name: "test",
   surname: "test",
   email: "test",
@@ -39,16 +42,39 @@ const data = {
   timezone: false,
   privacy_policy: false, 
   newsletter: false,
-
 };
 
+var dataobj;
+// getData();
+
+// async function getData () {
+//   try{
+//     await fetch('https://8svw2fhs59.execute-api.eu-west-2.amazonaws.com/dev/applicants/' + applicantID)
+//             .then(res => res.json())
+//             .then(data => dataobj = data);
+
+//     let data1 = await dataobj
+//     console.log(data1);
+
+//   } catch (err) {
+//     console.log('an error occurred', err);
+//   }
+// }
+
+// fetch('https://8svw2fhs59.execute-api.eu-west-2.amazonaws.com/dev/applicants/' + applicantID)
+//   .then(res => res.json())
+//   .then(data => dataobj = data);
 
 exports.generatePdf = async () => {
   const pdfBuffer = await new Promise(resolve => {
     const doc = new PDFDocument()
 
+    fetch('https://8svw2fhs59.execute-api.eu-west-2.amazonaws.com/dev/applicants/' + applicantID)
+      .then(res => res.json())
+      .then(data => dataobj = data); 
+
     generateHeader(doc)
-    generateBody(doc)
+    generateBody(doc, dataobj)
 
     doc.end()
 
@@ -107,7 +133,7 @@ function generateBody(doc, data) {
     .text(`Revenue 3 months ago(USD): ${data.revenue_3mo}`)
     .text(`Have you raised capital from investors for your startup?: ${data.raised_capital}`)
     .text(`If yes, how much capital (USD) have you raised, in what format (e.g SAFE, equity, etc), and from whom?: ${data.optional_raised_capital}`)
-    .text(`Founding team size:: ${data.founding_team_size}`)
+    .text(`Founding team size: ${data.founding_team_size}`)
     .text(`Does the founding team have majority ownership?: ${data.majority_ownership}`)
     .text(`Estimated Months of Runway: ${data.months_runway}`)
     .text(`Which countries are you targeting to expand to?: ${data.targeted_countries}`)
