@@ -45,25 +45,6 @@ var data = {
 };
 
 var dataobj;
-// getData();
-
-// async function getData () {
-//   try{
-//     await fetch('https://8svw2fhs59.execute-api.eu-west-2.amazonaws.com/dev/applicants/' + applicantID)
-//             .then(res => res.json())
-//             .then(data => dataobj = data);
-
-//     let data1 = await dataobj
-//     console.log(data1);
-
-//   } catch (err) {
-//     console.log('an error occurred', err);
-//   }
-// }
-
-// fetch('https://8svw2fhs59.execute-api.eu-west-2.amazonaws.com/dev/applicants/' + applicantID)
-//   .then(res => res.json())
-//   .then(data => dataobj = data);
 
 exports.generatePdf = async () => {
   const pdfBuffer = await new Promise(resolve => {
@@ -71,7 +52,6 @@ exports.generatePdf = async () => {
 
     fetch('https://8svw2fhs59.execute-api.eu-west-2.amazonaws.com/dev/applicants/' + applicantID)
       .then(res => res.json())
-      //.then(data => dataobj = data); 
       .then(dataObj => {
         generateHeader(doc)
         generateBody(doc, dataObj)
@@ -151,7 +131,6 @@ function generateBody(doc, data) {
     .text(`privacy_policy: ${data.timezone}`)
     .text(`timezone: ${data.privacy_policy}`)
     .text(`newsletter: ${data.newsletter}`)
-
     .moveDown();
 }
 
