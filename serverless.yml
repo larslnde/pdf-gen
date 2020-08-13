@@ -35,8 +35,8 @@ functions:
           method: get
           contentHandling: CONVERT_TO_BINARY
   sendEmail:
-    handler: sendEmail
+    handler: email.sendEmail
     events:
       - http:
           path: /email
-          method: post
+          method: get
