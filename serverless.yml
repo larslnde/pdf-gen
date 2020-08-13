@@ -20,6 +20,11 @@ provider:
   apiGateway:
     binaryMediaTypes:
       - "*/*"
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - ses:*
+      Resource: '*'
 
 functions: 
   generatePdf:
@@ -29,3 +34,9 @@ functions:
           path: /pdf
           method: get
           contentHandling: CONVERT_TO_BINARY
+  sendEmail:
+    handler: sendEmail
+    events:
+      - http:
+          path: /email
+          method: post

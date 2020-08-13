@@ -2,7 +2,6 @@
 const fs = require("fs");
 const PDFDocument = require("pdfkit")
 const axios = require('axios');
-const { getHeapCodeStatistics } = require("v8");
 
 var applicantID = '50726520-dbd6-11ea-95c1-fd48d42f0d8d'
 
