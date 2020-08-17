@@ -1,49 +1,10 @@
 'use strict';
 const fs = require("fs");
+const AWS = require('aws-sdk')
 const PDFDocument = require("pdfkit")
-const axios = require('axios');
+var s3 = new AWS.S3();
+var applicantID = 'c2851670-d18c-11ea-8457-ad91a07b81c7'
 
-var applicantID = '50726520-dbd6-11ea-95c1-fd48d42f0d8d'
-
-var data = {
-  company_name: "test",
-  company_website: "test",
-  first_name: "test",
-  surname: "test",
-  email: "test",
-  phone_number: "test",
-  incorp_country: "test",
-  incorp_date: "test",
-  operations_in_other_countries: "test",
-  optional_other_countries: "test",
-  sector: "test",
-  business_model: "test",
-  describe_company: "test",
-  pitch_deck: "test",
-  company_stage: "test",
-  monthly_users: "test",
-  revenue_1mo: "test",
-  revenue_2mo: "test",
-  revenue_3mo: "test",
-  raised_capital: false,
-  optional_raised_capital: "test",
-  founding_team_size: "test",
-  majority_ownership: false,
-  months_runway: "test",
-  targeted_countries: "test",
-  growth_strategy: "test",
-  industry_target_customer: "test",
-  customer_focus: "test",
-  achievement_hope: "test",
-  hear_about: "test",
-  anything_else: "test",
-  phaseType: "test",
-  timezone: false,
-  privacy_policy: false, 
-  newsletter: false,
-};
-
-var dataobj;
 
 exports.generatePdf = async () => {
   const pdfBuffer = await new Promise(resolve => {
@@ -54,19 +15,31 @@ exports.generatePdf = async () => {
       .then(dataObj => {
         generateHeader(doc)
         generateBody(doc, dataObj)
-    
         doc.end()
+        var key = dataObj.email;
     
         const buffers = []
         doc.on("data", buffers.push.bind(buffers))
         doc.on("end", () => {
           const pdfData = Buffer.concat(buffers)
           resolve(pdfData)
+          s3.putObject({
+            Bucket: 'my-pdf-demo-bucket',
+            Key: key,
+            Body: pdfData,
+            ContentType: "application/pdf",
+            }, function (err) {
+                if (err) {
+                    console.log(err, err.stack);
+                } else {
+                    console.log("Done. Link at:" + "https://my-pdf-demo-bucket.s3.eu-west-2.amazonaws.com/" + key);
+                }
+          });
+
+
+
         })
-
       })
-
-    
   })
 
   return {
@@ -95,10 +68,17 @@ function generateBody(doc, data) {
 
   doc
     .fontSize(12)
+    .text(`-------------`)
     .text(`Company Name: ${data.company_name}`)
+    .text(`-------------`)
     .text(`Company Website: ${data.company_website}`)
+    .text(`-------------`)
+
+  doc
+    
+    .lineGap(1)
     .text(`Primary contact's first name: ${data.first_name}`)
-    .text(`Primary contact's last name:: ${data.surname}`)
+    .text(`Primary contact's last name: ${data.surname}`)
     .text(`Primary contact's email address: ${data.email}`)
     .text(`Primary contact's US phone number: ${data.phone_number}`)
     .text(`What country was the company legally incorported?: ${data.incorp_country}`)
