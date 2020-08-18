@@ -21,10 +21,12 @@ provider:
     binaryMediaTypes:
       - "*/*"
   iamRoleStatements:
-    - Effect: Allow
+    - Effect: 'Allow'
       Action:
-        - ses:*
+        - 'ses:*'
+        - 'ses:sendRawEmail'
       Resource: '*'
+  
 
 functions: 
   generatePdf:
@@ -35,6 +37,7 @@ functions:
           method: get
           contentHandling: CONVERT_TO_BINARY
   sendEmail:
+    # handler: email.sendEmail
     handler: email.sendEmail
     events:
       - http:
