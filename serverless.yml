@@ -36,9 +36,9 @@ functions:
           path: /pdf
           method: get
           contentHandling: CONVERT_TO_BINARY
+          
   sendEmail:
-    # handler: email.sendEmail
-    handler: awsemail.handler
+    handler: email.handler
     events:
       - http:
           path: /email

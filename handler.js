@@ -5,6 +5,8 @@ const PDFDocument = require("pdfkit")
 var s3 = new AWS.S3();
 var applicantID = 'c2851670-d18c-11ea-8457-ad91a07b81c7'
 
+// import { email } from './awsemail'
+
 
 exports.generatePdf = async () => {
   const pdfBuffer = await new Promise(resolve => {
@@ -33,12 +35,10 @@ exports.generatePdf = async () => {
                 if (err) {
                     console.log(err, err.stack);
                 } else {
-                    console.log("Done.");
+                    console.log("Done");
+                    email('john.tadros%40gmail.com');
                 }
           });
-
-
-
         })
       })
   })
@@ -51,6 +51,7 @@ exports.generatePdf = async () => {
     isBase64Encoded: true,
   }
 }
+
 
 function generateHeader (doc) {
   doc

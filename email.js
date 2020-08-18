@@ -1,34 +1,45 @@
-let nodemailer = require('nodemailer');
-let aws = require('aws-sdk');
+// Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+// SPDX-License-Identifier: Apache-2.0
 
-var pathend = 'larslnde%40gmail.com';
 
-// configure AWS SDK
-//aws.config.loadFromPath('config.json');
-var credentials = new aws.SharedIniFileCredentials({profile: 'default'});
-aws.config.credentials = credentials;
-aws.config.region = 'eu-west-2';
+var aws = require('aws-sdk');
+var ses = new aws.SES({region: 'eu-west-2'});
 
-// create Nodemailer SES transporter
-let transporter = nodemailer.createTransport({
-    SES: new aws.SES({
-        apiVersion: '2010-12-01'
-    })
-});
+var key = "readInFromHandler"
+const myBucket = 'https://my-pdf-demo-bucket.s3.eu-west-2.amazonaws.com/';
+var link = myBucket + key
 
-// send some mail
-send = transporter.sendMail({
-    from: 'larslnde@gmail.com',
-    to: 'larslnde@gmail.com',
-    subject: 'Application recieved!',
-    text: 'Thank you for applying to the openner.vc accelerator program. We will review your application and get back to you as soon as possible.',
-    attachments: [
-    {   // use URL as an attachment
-      filename: 'YourApplication.pdf',
-      path: 'https://my-pdf-demo-bucket.s3.eu-west-2.amazonaws.com/' + pathend
-    },]
-}, (err, info) => {
-    console.log(info.envelope);
-    console.log(info.messageId);
-    console.log(err);
-});
+exports.handler = (event, context, callback) => {
+    
+     var params = {
+        Destination: {
+            ToAddresses: ["larslnde@gmail.com"]
+        },
+        Message: {
+            Body: {
+                Text: { Data: "Thank you for applying. Your application can be seen here: " + link
+                    
+                }
+                
+            },
+            
+            Subject: { Data: "Application recieved!"
+                
+            }
+        },
+        Source: "larslnde@gmail.com"
+    };
+
+    
+     ses.sendEmail(params, function (err, data) {
+        callback(null, {err: err, data: data});
+        if (err) {
+            console.log(err);
+            context.fail(err);
+        } else {
+            
+            console.log(data);
+            context.succeed(event);
+        }
+    });
+};
