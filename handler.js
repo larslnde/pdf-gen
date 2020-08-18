@@ -23,6 +23,7 @@ exports.generatePdf = async () => {
         doc.on("end", () => {
           const pdfData = Buffer.concat(buffers)
           resolve(pdfData)
+
           s3.putObject({
             Bucket: 'my-pdf-demo-bucket',
             Key: key,
@@ -32,7 +33,7 @@ exports.generatePdf = async () => {
                 if (err) {
                     console.log(err, err.stack);
                 } else {
-                    console.log("Done. Link at:" + "https://my-pdf-demo-bucket.s3.eu-west-2.amazonaws.com/" + key);
+                    console.log("Done.");
                 }
           });
 

@@ -38,7 +38,7 @@ functions:
           contentHandling: CONVERT_TO_BINARY
   sendEmail:
     # handler: email.sendEmail
-    handler: email.sendEmail
+    handler: awsemail.handler
     events:
       - http:
           path: /email

@@ -4,20 +4,6 @@ var ses = new aws.SES();
 var s3 = new aws.S3();
 aws.config.region = 'eu-west-2'
 
-function getS3File(bucket, key) {
-  return new Promise(function(resolve, reject) {
-      s3.getObject(
-          {
-              Bucket: bucket,
-              Key: key
-          },
-          function (err, data) {
-              if (err) return reject(err);
-              else return resolve(data);
-          }
-      );
-  })
-}
 
 // Both must (currently) be confirmed in the aws sandbox
 const sender = "larslnde@gmail.com";
