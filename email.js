@@ -10,7 +10,6 @@ const myBucket = 'https://my-pdf-demo-bucket.s3.eu-west-2.amazonaws.com/';
 var link = myBucket + key
 
 exports.handler = (event, context, callback) => {
-    
      var params = {
         Destination: {
             ToAddresses: ["larslnde@gmail.com"]
@@ -20,17 +19,14 @@ exports.handler = (event, context, callback) => {
                 Text: { Data: "Thank you for applying. Your application can be seen here: " + link
                     
                 }
-                
             },
             
-            Subject: { Data: "Application recieved!"
-                
+            Subject: { Data: "Application recieved!" 
             }
         },
         Source: "larslnde@gmail.com"
     };
 
-    
      ses.sendEmail(params, function (err, data) {
         callback(null, {err: err, data: data});
         if (err) {

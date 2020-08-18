@@ -3,9 +3,8 @@ const fs = require("fs");
 const AWS = require('aws-sdk')
 const PDFDocument = require("pdfkit")
 var s3 = new AWS.S3();
+var ses = new AWS.SES({region: 'eu-west-2'});
 var applicantID = 'c2851670-d18c-11ea-8457-ad91a07b81c7'
-
-// import { email } from './awsemail'
 
 
 exports.generatePdf = async () => {
@@ -18,7 +17,7 @@ exports.generatePdf = async () => {
         generateHeader(doc)
         generateBody(doc, dataObj)
         doc.end()
-        var key = dataObj.email;
+        var key = dataObj.id;
     
         const buffers = []
         doc.on("data", buffers.push.bind(buffers))
@@ -36,7 +35,42 @@ exports.generatePdf = async () => {
                     console.log(err, err.stack);
                 } else {
                     console.log("Done");
-                    email('john.tadros%40gmail.com');
+                    const myBucket = 'https://my-pdf-demo-bucket.s3.eu-west-2.amazonaws.com/';
+                    var link = myBucket + key
+
+                    var params = {
+                      Destination: {
+                          ToAddresses: ["larslnde@gmail.com"]
+                      },
+                      Message: {
+                          Body: {
+                              Text: { Data: "Thank you for applying. Your application can be seen here: " + link
+                                  
+                              }
+                          },
+                          
+                          Subject: { Data: "Application recieved!" 
+                          }
+                      },
+                      Source: "larslnde@gmail.com"
+                  };
+              
+                    ses.sendEmail(params, function (err, data) {
+                        // callback(null, {err: err, data: data});
+                        if (err) {
+                            console.log(err);
+                            context.fail(err);
+                        } else {
+                            
+                            console.log(data);
+                            //context.succeed(event);
+                        }
+                    });
+
+                    
+                  
+
+
                 }
           });
         })
