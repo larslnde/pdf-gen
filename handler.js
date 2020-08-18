@@ -2,8 +2,11 @@
 const fs = require("fs");
 const AWS = require('aws-sdk')
 const PDFDocument = require("pdfkit")
+const fetch = require("node-fetch");
 var s3 = new AWS.S3();
 var ses = new AWS.SES({region: 'eu-west-2'});
+
+//This needs to change to generate different PDFs.
 var applicantID = 'c2851670-d18c-11ea-8457-ad91a07b81c7'
 
 
@@ -57,20 +60,17 @@ exports.generatePdf = async () => {
               
                     ses.sendEmail(params, function (err, data) {
                         // callback(null, {err: err, data: data});
+                        console.log("before if")
                         if (err) {
+                            console.log("error happened")
                             console.log(err);
-                            context.fail(err);
+                            //context.fail(err);
                         } else {
-                            
+                            console.log("i am here")
                             console.log(data);
                             //context.succeed(event);
                         }
                     });
-
-                    
-                  
-
-
                 }
           });
         })
@@ -90,14 +90,21 @@ exports.generatePdf = async () => {
 function generateHeader (doc) {
   doc
     .fontSize(20)
-    .text("Openner.vc Application", 110, 57, { align: "middle"})
+    .text("Application", 110, 57, { align: "middle"})
     .fontSize(10)
     .text("Contact at:", 200, 65, { align: "right" })
     .text("info@openner.vc", 200, 80, { align: "right" })
     .moveDown();
+  doc
+    .image('logo.png')
+    .moveDown()
+  doc
+    .text("Accelerator program application", { align: "middle"})
 }
 
 function generateBody(doc, data) {
+  doc.addPage()
+
   doc
     .fontSize(16)
     .text("Your application:", 50, 160);
