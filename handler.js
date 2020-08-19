@@ -28,6 +28,7 @@ exports.generatePdf = async () => {
           const pdfData = Buffer.concat(buffers)
           resolve(pdfData)
 
+          // Code for placing PDF into S3 bucket
           s3.putObject({
             Bucket: 'my-pdf-demo-bucket',
             Key: key,
@@ -41,6 +42,8 @@ exports.generatePdf = async () => {
                     const myBucket = 'https://my-pdf-demo-bucket.s3.eu-west-2.amazonaws.com/';
                     var link = myBucket + key
 
+                  
+                    //Code for email below
                     var params = {
                       Destination: {
                           ToAddresses: ["larslnde@gmail.com"]
@@ -57,25 +60,37 @@ exports.generatePdf = async () => {
                       },
                       Source: "larslnde@gmail.com"
                   };
-              
+                  
+                  console.log("hello");
+
+                  // const response = await ses.sendEmail(params).promise();
+                  // console.log(response);
+
+                  sendEmail();
+
+                  //handler = (event, context, callback) => { //c
+                  function sendEmail () {
                     ses.sendEmail(params, function (err, data) {
-                        // callback(null, {err: err, data: data});
+                       console.log("before callback")
+                        callback(null, {err: err, data: data}); //c
                         console.log("before if")
                         if (err) {
                             console.log("error happened")
                             console.log(err);
-                            //context.fail(err);
+                            //context.fail(err); //c
                         } else {
                             console.log("i am here")
                             console.log(data);
-                            //context.succeed(event);
+                            //context.succeed(event); //c
                         }
                     });
+                  }  //c
                 }
           });
         })
       })
   })
+
 
   return {
     headers: {
@@ -85,6 +100,38 @@ exports.generatePdf = async () => {
     isBase64Encoded: true,
   }
 }
+
+
+exports.test = (event, context, callback) => {
+  var params = {
+     Destination: {
+         ToAddresses: ["larslnde@gmail.com"]
+     },
+     Message: {
+         Body: {
+             Text: { Data: "Thank you for applying. Your application can be seen here: " + "link"
+                 
+             }
+         },
+         
+         Subject: { Data: "Application recieved!" 
+         }
+     },
+     Source: "larslnde@gmail.com"
+ };
+
+  ses.sendEmail(params, function (err, data) {
+     callback(null, {err: err, data: data});
+     if (err) {
+         console.log(err);
+         context.fail(err);
+     } else {
+         
+         console.log(data);
+         context.succeed(event);
+     }
+ });
+};
 
 
 function generateHeader (doc) {
