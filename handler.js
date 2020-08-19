@@ -1,69 +1,14 @@
 'use strict';
 const fs = require("fs");
+const AWS = require('aws-sdk')
 const PDFDocument = require("pdfkit")
-const axios = require('axios');
-const { getHeapCodeStatistics } = require("v8");
+const fetch = require("node-fetch");
+var s3 = new AWS.S3();
+var ses = new AWS.SES({region: 'eu-west-2'});
 
-var applicantID = '50726520-dbd6-11ea-95c1-fd48d42f0d8d'
+//This needs to change to generate different PDFs.
+var applicantID = 'c2851670-d18c-11ea-8457-ad91a07b81c7'
 
-var data = {
-  company_name: "test",
-  company_website: "test",
-  first_name: "test",
-  surname: "test",
-  email: "test",
-  phone_number: "test",
-  incorp_country: "test",
-  incorp_date: "test",
-  operations_in_other_countries: "test",
-  optional_other_countries: "test",
-  sector: "test",
-  business_model: "test",
-  describe_company: "test",
-  pitch_deck: "test",
-  company_stage: "test",
-  monthly_users: "test",
-  revenue_1mo: "test",
-  revenue_2mo: "test",
-  revenue_3mo: "test",
-  raised_capital: false,
-  optional_raised_capital: "test",
-  founding_team_size: "test",
-  majority_ownership: false,
-  months_runway: "test",
-  targeted_countries: "test",
-  growth_strategy: "test",
-  industry_target_customer: "test",
-  customer_focus: "test",
-  achievement_hope: "test",
-  hear_about: "test",
-  anything_else: "test",
-  phaseType: "test",
-  timezone: false,
-  privacy_policy: false, 
-  newsletter: false,
-};
-
-var dataobj;
-// getData();
-
-// async function getData () {
-//   try{
-//     await fetch('https://8svw2fhs59.execute-api.eu-west-2.amazonaws.com/dev/applicants/' + applicantID)
-//             .then(res => res.json())
-//             .then(data => dataobj = data);
-
-//     let data1 = await dataobj
-//     console.log(data1);
-
-//   } catch (err) {
-//     console.log('an error occurred', err);
-//   }
-// }
-
-// fetch('https://8svw2fhs59.execute-api.eu-west-2.amazonaws.com/dev/applicants/' + applicantID)
-//   .then(res => res.json())
-//   .then(data => dataobj = data);
 
 exports.generatePdf = async () => {
   const pdfBuffer = await new Promise(resolve => {
@@ -71,24 +16,81 @@ exports.generatePdf = async () => {
 
     fetch('https://8svw2fhs59.execute-api.eu-west-2.amazonaws.com/dev/applicants/' + applicantID)
       .then(res => res.json())
-      //.then(data => dataobj = data); 
       .then(dataObj => {
         generateHeader(doc)
         generateBody(doc, dataObj)
-    
         doc.end()
+        var key = dataObj.id;
     
         const buffers = []
         doc.on("data", buffers.push.bind(buffers))
         doc.on("end", () => {
           const pdfData = Buffer.concat(buffers)
           resolve(pdfData)
+
+          // Code for placing PDF into S3 bucket
+          s3.putObject({
+            Bucket: 'my-pdf-demo-bucket',
+            Key: key,
+            Body: pdfData,
+            ContentType: "application/pdf",
+            }, function (err) {
+                if (err) {
+                    console.log(err, err.stack);
+                } else {
+                    console.log("Done");
+                    const myBucket = 'https://my-pdf-demo-bucket.s3.eu-west-2.amazonaws.com/';
+                    var link = myBucket + key
+
+                  
+                    //Code for email below
+                    var params = {
+                      Destination: {
+                          ToAddresses: ["larslnde@gmail.com"]
+                      },
+                      Message: {
+                          Body: {
+                              Text: { Data: "Thank you for applying. Your application can be seen here: " + link
+                                  
+                              }
+                          },
+                          
+                          Subject: { Data: "Application recieved!" 
+                          }
+                      },
+                      Source: "larslnde@gmail.com"
+                  };
+                  
+                  console.log("hello");
+
+                  // const response = await ses.sendEmail(params).promise();
+                  // console.log(response);
+
+                  sendEmail();
+
+                  //handler = (event, context, callback) => { //c
+                  function sendEmail () {
+                    ses.sendEmail(params, function (err, data) {
+                       console.log("before callback")
+                        callback(null, {err: err, data: data}); //c
+                        console.log("before if")
+                        if (err) {
+                            console.log("error happened")
+                            console.log(err);
+                            //context.fail(err); //c
+                        } else {
+                            console.log("i am here")
+                            console.log(data);
+                            //context.succeed(event); //c
+                        }
+                    });
+                  }  //c
+                }
+          });
         })
-
       })
-
-    
   })
+
 
   return {
     headers: {
@@ -99,27 +101,74 @@ exports.generatePdf = async () => {
   }
 }
 
+
+exports.test = (event, context, callback) => {
+  var params = {
+     Destination: {
+         ToAddresses: ["larslnde@gmail.com"]
+     },
+     Message: {
+         Body: {
+             Text: { Data: "Thank you for applying. Your application can be seen here: " + "link"
+                 
+             }
+         },
+         
+         Subject: { Data: "Application recieved!" 
+         }
+     },
+     Source: "larslnde@gmail.com"
+ };
+
+  ses.sendEmail(params, function (err, data) {
+     callback(null, {err: err, data: data});
+     if (err) {
+         console.log(err);
+         context.fail(err);
+     } else {
+         
+         console.log(data);
+         context.succeed(event);
+     }
+ });
+};
+
+
 function generateHeader (doc) {
   doc
     .fontSize(20)
-    .text("Openner.vc Application", 110, 57, { align: "middle"})
+    .text("Application", 110, 57, { align: "middle"})
     .fontSize(10)
     .text("Contact at:", 200, 65, { align: "right" })
     .text("info@openner.vc", 200, 80, { align: "right" })
     .moveDown();
+  doc
+    .image('logo.png')
+    .moveDown()
+  doc
+    .text("Accelerator program application", { align: "middle"})
 }
 
 function generateBody(doc, data) {
+  doc.addPage()
+
   doc
     .fontSize(16)
     .text("Your application:", 50, 160);
 
   doc
     .fontSize(12)
+    .text(`-------------`)
     .text(`Company Name: ${data.company_name}`)
+    .text(`-------------`)
     .text(`Company Website: ${data.company_website}`)
+    .text(`-------------`)
+
+  doc
+    
+    .lineGap(1)
     .text(`Primary contact's first name: ${data.first_name}`)
-    .text(`Primary contact's last name:: ${data.surname}`)
+    .text(`Primary contact's last name: ${data.surname}`)
     .text(`Primary contact's email address: ${data.email}`)
     .text(`Primary contact's US phone number: ${data.phone_number}`)
     .text(`What country was the company legally incorported?: ${data.incorp_country}`)
@@ -151,7 +200,6 @@ function generateBody(doc, data) {
     .text(`privacy_policy: ${data.timezone}`)
     .text(`timezone: ${data.privacy_policy}`)
     .text(`newsletter: ${data.newsletter}`)
-
     .moveDown();
 }
 

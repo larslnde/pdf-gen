@@ -20,6 +20,13 @@ provider:
   apiGateway:
     binaryMediaTypes:
       - "*/*"
+  iamRoleStatements:
+    - Effect: 'Allow'
+      Action:
+        - 'ses:*'
+        - 'ses:sendRawEmail'
+      Resource: '*'
+  
 
 functions: 
   generatePdf:
@@ -29,3 +36,17 @@ functions:
           path: /pdf
           method: get
           contentHandling: CONVERT_TO_BINARY
+  
+  sendTest:
+    handler: handler.test
+    events:
+      - http:
+          path: /test
+          method: get
+            
+  sendEmail:
+    handler: email.handler
+    events:
+      - http:
+          path: /email
+          method: get
