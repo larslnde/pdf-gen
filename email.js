@@ -16,7 +16,7 @@ exports.handler = (event, context, callback) => {
         },
         Message: {
             Body: {
-                Text: { Data: "Thank you for applying. Your application can be seen here: " + link
+                Text: { Data: "this is a test email"
                     
                 }
             },

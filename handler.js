@@ -39,6 +39,8 @@ exports.generatePdf = async () => {
                 if (err) {
                     console.log(err, err.stack);
                 } else {
+                    //IT DID NOT WORK HERE
+                    //fetch('https://3d2zlxxvs7.execute-api.eu-west-2.amazonaws.com/dev/email');
                     console.log("Done");
                   //}  //c
                 }
@@ -46,6 +48,8 @@ exports.generatePdf = async () => {
         })
       })
   })
+
+  fetch('https://3d2zlxxvs7.execute-api.eu-west-2.amazonaws.com/dev/email');
 
   const myBucket = 'https://my-pdf-demo-bucket.s3.eu-west-2.amazonaws.com/';
   var link = myBucket + key
@@ -202,7 +206,7 @@ exports.test = (event, context, callback) => {
      },
      Message: {
          Body: {
-             Text: { Data: "Thank you for applying. Your application can be seen here: " + "link"
+             Text: { Data: "This is a test email"
                  
              }
          },
