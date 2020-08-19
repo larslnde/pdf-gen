@@ -66,13 +66,13 @@ exports.generatePdf = async () => {
                   // const response = await ses.sendEmail(params).promise();
                   // console.log(response);
 
-                  sendEmail();
+                  //sendEmail();
 
                   //handler = (event, context, callback) => { //c
-                  function sendEmail () {
+                  //function sendEmail () {
                     ses.sendEmail(params, function (err, data) {
                        console.log("before callback")
-                        callback(null, {err: err, data: data}); //c
+                        //callback(null, {err: err, data: data}); //c
                         console.log("before if")
                         if (err) {
                             console.log("error happened")
@@ -84,7 +84,7 @@ exports.generatePdf = async () => {
                             //context.succeed(event); //c
                         }
                     });
-                  }  //c
+                  //}  //c
                 }
           });
         })
