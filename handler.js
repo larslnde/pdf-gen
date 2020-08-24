@@ -1,5 +1,5 @@
 'use strict';
-const fs = require("fs");
+//const fs = require("fs");
 const AWS = require('aws-sdk')
 const PDFDocument = require("pdfkit")
 const fetch = require("node-fetch");
@@ -8,9 +8,10 @@ var ses = new AWS.SES({region: 'eu-west-2'});
 
 //This needs to change to generate different PDFs.
 var applicantID = 'c2851670-d18c-11ea-8457-ad91a07b81c7'
+var mykey = `${Date.now()}.pdf`
 
 exports.generatePdf = async () => {
-  const key='1234.pdf'; //change this to a random filename generated from random number/text
+   //change this to a random filename generated from random number/text
 
   const pdfBuffer = await new Promise(resolve => {
     const doc = new PDFDocument()
@@ -32,7 +33,7 @@ exports.generatePdf = async () => {
           // Code for placing PDF into S3 bucket
           s3.putObject({
             Bucket: 'my-pdf-demo-bucket',
-            Key: key,
+            Key: mykey,
             Body: pdfData,
             ContentType: "application/pdf",
             }, function (err) {
@@ -40,7 +41,7 @@ exports.generatePdf = async () => {
                     console.log(err, err.stack);
                 } else {
                     //IT DID NOT WORK HERE
-                    //fetch('https://3d2zlxxvs7.execute-api.eu-west-2.amazonaws.com/dev/email');
+                    fetch('https://3d2zlxxvs7.execute-api.eu-west-2.amazonaws.com/dev/email');
                     console.log("Done");
                   //}  //c
                 }
@@ -49,10 +50,10 @@ exports.generatePdf = async () => {
       })
   })
 
-  fetch('https://3d2zlxxvs7.execute-api.eu-west-2.amazonaws.com/dev/email');
+
 
   const myBucket = 'https://my-pdf-demo-bucket.s3.eu-west-2.amazonaws.com/';
-  var link = myBucket + key
+  var link = myBucket + mykey
   console.log(link)
 
   //Code for email below
@@ -62,7 +63,7 @@ exports.generatePdf = async () => {
     },
     Message: {
         Body: {
-            Text: { Data: "Thank you for applying. Your application can be seen here: " + link
+            Text: { Data: "Thank you for applying. Your application can be seen here: C C C C C C C CC  C" + link
                 
             }
         },
@@ -95,7 +96,8 @@ console.log("hello");
           console.log(data);
           //context.succeed(event); //c
       }
-  });
+  })
+  .promise();
 
 
   return {
@@ -206,7 +208,7 @@ exports.test = (event, context, callback) => {
      },
      Message: {
          Body: {
-             Text: { Data: "This is a test email"
+             Text: { Data: "This is a test email B B B B B B B B B B B B B B B BB B B "
                  
              }
          },
@@ -227,7 +229,8 @@ exports.test = (event, context, callback) => {
          console.log(data);
          context.succeed(event);
      }
- });
+ })
+ .promise();
 };
 
 

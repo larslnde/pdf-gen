@@ -5,10 +5,6 @@
 var aws = require('aws-sdk');
 var ses = new aws.SES({region: 'eu-west-2'});
 
-var key = "readInFromHandler"
-const myBucket = 'https://my-pdf-demo-bucket.s3.eu-west-2.amazonaws.com/';
-var link = myBucket + key
-
 exports.handler = (event, context, callback) => {
      var params = {
         Destination: {
@@ -16,7 +12,7 @@ exports.handler = (event, context, callback) => {
         },
         Message: {
             Body: {
-                Text: { Data: "this is a test email"
+                Text: { Data: "this is a test email A A A A A AA A A AA A "
                     
                 }
             },
