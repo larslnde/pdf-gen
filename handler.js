@@ -1,17 +1,14 @@
 'use strict';
-//const fs = require("fs");
 const AWS = require('aws-sdk')
 const PDFDocument = require("pdfkit")
 const fetch = require("node-fetch");
 var s3 = new AWS.S3();
-var ses = new AWS.SES({region: 'eu-west-2'});
 
 //This needs to change to generate different PDFs.
 var applicantID = 'c2851670-d18c-11ea-8457-ad91a07b81c7'
 var mykey = `${Date.now()}.pdf`
 
 exports.generatePdf = async () => {
-   //change this to a random filename generated from random number/text
 
   const pdfBuffer = await new Promise(resolve => {
     const doc = new PDFDocument()
@@ -22,7 +19,6 @@ exports.generatePdf = async () => {
         generateHeader(doc)
         generateBody(doc, dataObj)
         doc.end()
-        //var key = dataObj.id;
     
         const buffers = []
         doc.on("data", buffers.push.bind(buffers))
@@ -40,65 +36,12 @@ exports.generatePdf = async () => {
                 if (err) {
                     console.log(err, err.stack);
                 } else {
-                    //IT DID NOT WORK HERE
-                    fetch('https://3d2zlxxvs7.execute-api.eu-west-2.amazonaws.com/dev/email');
                     console.log("Done");
-                  //}  //c
                 }
           });
         })
       })
   })
-
-
-
-  const myBucket = 'https://my-pdf-demo-bucket.s3.eu-west-2.amazonaws.com/';
-  var link = myBucket + mykey
-  console.log(link)
-
-  //Code for email below
-  var params = {
-    Destination: {
-        ToAddresses: ["larslnde@gmail.com"]
-    },
-    Message: {
-        Body: {
-            Text: { Data: "Thank you for applying. Your application can be seen here: C C C C C C C CC  C" + link
-                
-            }
-        },
-        
-        Subject: { Data: "Application recieved!" 
-        }
-    },
-    Source: "larslnde@gmail.com"
-};
-
-console.log("hello");
-
-// const response = await ses.sendEmail(params).promise();
-// console.log(response);
-
-//sendEmail();
-
-//handler = (event, context, callback) => { //c
-//function sendEmail () {
-  ses.sendEmail(params, function (err, data) {
-      console.log("before callback")
-      //callback(null, {err: err, data: data}); //c
-      console.log("before if")
-      if (err) {
-          console.log("error happened")
-          console.log(err);
-          //context.fail(err); //c
-      } else {
-          console.log("i am here")
-          console.log(data);
-          //context.succeed(event); //c
-      }
-  })
-  .promise();
-
 
   return {
     headers: {
@@ -108,131 +51,6 @@ console.log("hello");
     isBase64Encoded: true,
   }
 }
-
-/*exports.generatePdf = async () => {
-  const pdfBuffer = await new Promise(resolve => {
-    const doc = new PDFDocument()
-
-    fetch('https://8svw2fhs59.execute-api.eu-west-2.amazonaws.com/dev/applicants/' + applicantID)
-      .then(res => res.json())
-      .then(dataObj => {
-        generateHeader(doc)
-        generateBody(doc, dataObj)
-        doc.end()
-        var key = dataObj.id;
-    
-        const buffers = []
-        doc.on("data", buffers.push.bind(buffers))
-        doc.on("end", () => {
-          const pdfData = Buffer.concat(buffers)
-          resolve(pdfData)
-
-          // Code for placing PDF into S3 bucket
-          s3.putObject({
-            Bucket: 'my-pdf-demo-bucket',
-            Key: key,
-            Body: pdfData,
-            ContentType: "application/pdf",
-            }, function (err) {
-                if (err) {
-                    console.log(err, err.stack);
-                } else {
-                    console.log("Done");
-                    const myBucket = 'https://my-pdf-demo-bucket.s3.eu-west-2.amazonaws.com/';
-                    var link = myBucket + key
-
-                  
-                    //Code for email below
-                    var params = {
-                      Destination: {
-                          ToAddresses: ["larslnde@gmail.com"]
-                      },
-                      Message: {
-                          Body: {
-                              Text: { Data: "Thank you for applying. Your application can be seen here: " + link
-                                  
-                              }
-                          },
-                          
-                          Subject: { Data: "Application recieved!" 
-                          }
-                      },
-                      Source: "larslnde@gmail.com"
-                  };
-                  
-                  console.log("hello");
-
-                  // const response = await ses.sendEmail(params).promise();
-                  // console.log(response);
-
-                  //sendEmail();
-
-                  //handler = (event, context, callback) => { //c
-                  //function sendEmail () {
-                    ses.sendEmail(params, function (err, data) {
-                       console.log("before callback")
-                        //callback(null, {err: err, data: data}); //c
-                        console.log("before if")
-                        if (err) {
-                            console.log("error happened")
-                            console.log(err);
-                            //context.fail(err); //c
-                        } else {
-                            console.log("i am here")
-                            console.log(data);
-                            //context.succeed(event); //c
-                        }
-                    });
-                  //}  //c
-                }
-          });
-        })
-      })
-  })
-
-
-  return {
-    headers: {
-      "content-type": "application/pdf",
-    },
-    body: pdfBuffer.toString("base64"),
-    isBase64Encoded: true,
-  }
-}*/
-
-
-exports.test = (event, context, callback) => {
-  var params = {
-     Destination: {
-         ToAddresses: ["larslnde@gmail.com"]
-     },
-     Message: {
-         Body: {
-             Text: { Data: "This is a test email B B B B B B B B B B B B B B B BB B B "
-                 
-             }
-         },
-         
-         Subject: { Data: "Application recieved!" 
-         }
-     },
-     Source: "larslnde@gmail.com"
- };
-
-  ses.sendEmail(params, function (err, data) {
-     callback(null, {err: err, data: data});
-     if (err) {
-         console.log(err);
-         context.fail(err);
-     } else {
-         
-         console.log(data);
-         context.succeed(event);
-     }
- })
- .promise();
-};
-
 
 function generateHeader (doc) {
   doc
