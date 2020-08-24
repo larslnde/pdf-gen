@@ -26,7 +26,6 @@ provider:
         - 'ses:*'
         - 'ses:sendRawEmail'
       Resource: '*'
-  
 
 functions: 
   generatePdf:
@@ -37,9 +36,3 @@ functions:
           method: get
           contentHandling: CONVERT_TO_BINARY
             
-  sendEmail:
-    handler: email.handler
-    events:
-      - http:
-          path: /email
-          method: get
